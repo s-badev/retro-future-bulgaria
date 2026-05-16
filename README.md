@@ -75,4 +75,4 @@ Supabase integration is planned for v2 to support authenticated user profiles, c
 
 ## 👤 Author
 
-- **S. Badev** — Frontend Developer
+- **S. Badev** 
