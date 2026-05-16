@@ -22,16 +22,6 @@ Retro Future Bulgaria is a cinematic interactive web app that lets users explore
 - Fully static and Netlify-ready
 - No backend required in MVP
 
-## 🖼️ Screenshots
-
-### Home / Hero
-![Home screen](assets/screenshots/home.png)
-
-### Timeline Dossier
-![Timeline dossier](assets/screenshots/timeline-dossier.png)
-
-### Archive Favorites
-![Archive favorites](assets/screenshots/favorites.png)
 
 ## 🧱 Tech Stack
 
