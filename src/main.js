@@ -21,6 +21,7 @@ const scenarios = [
   'Османска сенчеста времева линия',
   'Бъдеще от Възраждането',
   'Черноморска технологична република',
+  'Дунавска технологична република',
 ]
 
 const app = document.querySelector('#app')
@@ -45,7 +46,7 @@ app.innerHTML = `
         </div>
         <div class="hero-actions">
           <button class="btn" id="start-exploring">Започни</button>
-          <button class="btn secondary" id="random-hero">Случайна времева линия</button>
+          <button class="btn secondary" id="random-hero">Случайна линия</button>
         </div>
       </div>
     </header>
@@ -188,7 +189,7 @@ const buildResultCard = (timeline) => {
 
   resultCard.innerHTML = `
     <div class="reveal">
-  <div class="archive-label">Досие на времева линия</div>
+  <div class="archive-label">Архивно досие</div>
       <h2>${timeline.title}</h2>
       <div class="archive-meta">
         <span>Архивен код: ${archiveId}</span>
