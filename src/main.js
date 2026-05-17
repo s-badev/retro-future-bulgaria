@@ -47,7 +47,7 @@ app.innerHTML = `
         <div class="hero-chips">
           <span class="chip">Локални данни</span>
           <span class="chip">Без AI API</span>
-          <span class="chip">Готов за Netlify</span>
+          <span class="chip">Статичен архив</span>
           <span class="chip">Локален архив</span>
         </div>
         <div class="hero-actions">
@@ -68,7 +68,7 @@ app.innerHTML = `
       </div>
       <div class="status-card">
         <span>Архив</span>
-        <strong>Browser Storage</strong>
+        <strong>Локално хранилище</strong>
       </div>
       <div class="status-card">
         <span>Външни заявки</span>
