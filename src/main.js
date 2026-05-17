@@ -34,22 +34,26 @@ const app = document.querySelector('#app')
 
 app.innerHTML = `
   <div class="app">
+    <div class="system-bar">
+      <span>RFB_OS v2.084</span>
+      <div class="system-bar-right">
+        <span>РЕЖИМ: ЛОКАЛЕН АРХИВ</span>
+        <span id="system-time">--:--</span>
+      </div>
+    </div>
     <header class="hero">
       <div class="hero-content">
-        <span class="hero-label">Симулатор на алтернативна история</span>
+        <div class="hero-labels">
+          <span class="hero-label">Симулатор на алтернативна история</span>
+          <span class="hero-label-secondary">Паралелен регистър</span>
+        </div>
         <h1>Retro Future Bulgaria</h1>
         <p class="hero-subtitle">
-          Изследвай алтернативни версии на български градове през история, антиутопия, носталгия и възможни бъдеща.
+          Изследвай алтернативни версии на български градове през история, антиутопия, носталгия и възможно бъдеще.
         </p>
         <p class="hero-description">
-          Навигирай кинематографични линии, в които балканските градове се развиват през царски преврати, неонови републики и разпадащи се хоризонти.
+          Навигирай през архивни сигнали, градски легенди и паралелни линии, в които България се развива по различен път.
         </p>
-        <div class="hero-chips">
-          <span class="chip">Локални данни</span>
-          <span class="chip">Без AI API</span>
-          <span class="chip">Статичен архив</span>
-          <span class="chip">Локален архив</span>
-        </div>
         <div class="hero-actions">
           <button class="btn" id="start-exploring" type="button">Започни</button>
           <button class="btn secondary" id="random-hero" type="button">Случайна линия</button>
@@ -74,10 +78,14 @@ app.innerHTML = `
         <span>Външни заявки</span>
         <strong>Няма</strong>
       </div>
+      <div class="status-card">
+        <span>Последен достъп</span>
+        <strong id="last-access">--.--.---- // --:--</strong>
+      </div>
     </section>
 
     <main class="content">
-      <section class="featured card">
+      <section class="featured card archive-panel" id="archive-panel">
         <div class="section-title">
           <h3>Избрани архиви</h3>
           <p>Бърз достъп до ключови времеви линии в регистъра.</p>
@@ -89,6 +97,7 @@ app.innerHTML = `
               if (!timeline) return ''
               return `
                 <button class="featured-card" data-feature-id="${timeline.id}" type="button">
+                  <span class="featured-accent" aria-hidden="true"></span>
                   <span class="featured-title">${timeline.city} · ${timeline.year}</span>
                   <strong>${timeline.title}</strong>
                   <span class="featured-scenario">${timeline.scenario}</span>
@@ -97,6 +106,19 @@ app.innerHTML = `
               `
             })
             .join('')}
+        </div>
+        <div class="archive-divider" role="presentation"></div>
+        <div class="archive-section" id="favorites">
+          <div class="section-title compact">
+            <h3>Личен архив</h3>
+            <p>Съхранени сигнали от линии, които искаш да разгледаш отново.</p>
+          </div>
+          <div class="favorites-list" id="favorites-list">
+            <div class="favorites-empty">
+              <p class="empty-title">Още няма запазени времеви линии.</p>
+              <p class="empty-secondary">Запази първата, за да изградиш личния си архив.</p>
+            </div>
+          </div>
         </div>
       </section>
       <section class="controls card" id="controls">
@@ -127,6 +149,26 @@ app.innerHTML = `
         </div>
   <button class="btn" id="generate" type="button">Отвори избраната линия</button>
   <button class="btn secondary" id="random" type="button">Отвори случайна линия</button>
+        <div class="status-divider" role="presentation"></div>
+        <div class="coord-status" aria-live="polite">
+          <h4>Сигнална диагностика</h4>
+          <div class="coord-row">
+            <span>Градски възел</span>
+            <strong id="coord-city">Всички</strong>
+          </div>
+          <div class="coord-row">
+            <span>Времева честота</span>
+            <strong id="coord-year">Всички</strong>
+          </div>
+          <div class="coord-row">
+            <span>Сценарен слой</span>
+            <strong id="coord-scenario">Всички</strong>
+          </div>
+          <div class="coord-row">
+            <span>Достъп</span>
+            <strong id="coord-access">Готов</strong>
+          </div>
+        </div>
       </section>
 
       <section class="result card" id="result-card">
@@ -145,19 +187,10 @@ app.innerHTML = `
         </div>
       </section>
 
-      <section class="card" id="favorites">
-        <div class="section-title">
-          <h3>Личен архив</h3>
-          <p>Съхранени сигнали от линии, които искаш да разгледаш отново.</p>
-        </div>
-        <div class="favorites-list" id="favorites-list">
-          <p class="empty-state">Още няма запазени времеви линии. Запази първата, за да изградиш личния си архив.</p>
-        </div>
-      </section>
     </main>
 
     <footer>
-      Retro Future Bulgaria MVP · Локални данни · Netlify-ready
+      Retro Future Bulgaria · Локален архив · Публична симулация
     </footer>
   </div>
 `
@@ -168,6 +201,11 @@ const generateButton = document.querySelector('#generate')
 const randomButton = document.querySelector('#random')
 const resultCard = document.querySelector('#result-card')
 const favoritesList = document.querySelector('#favorites-list')
+const coordCity = document.querySelector('#coord-city')
+const coordYear = document.querySelector('#coord-year')
+const coordScenario = document.querySelector('#coord-scenario')
+const systemTime = document.querySelector('#system-time')
+const lastAccess = document.querySelector('#last-access')
 
 const citySelect = document.querySelector('#city-select')
 const yearSelect = document.querySelector('#year-select')
@@ -204,6 +242,27 @@ const getFilters = () => ({
   scenario: scenarioSelect.value,
 })
 
+const formatDateTime = (date) => {
+  const day = String(date.getDate()).padStart(2, '0')
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const year = date.getFullYear()
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  return `${day}.${month}.${year} // ${hours}:${minutes}`
+}
+
+const updateSystemTime = () => {
+  const now = new Date()
+  systemTime.textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+  lastAccess.textContent = formatDateTime(now)
+}
+
+const updateCoordinateStatus = () => {
+  coordCity.textContent = citySelect.value || 'Всички'
+  coordYear.textContent = yearSelect.value || 'Всички'
+  coordScenario.textContent = scenarioSelect.value || 'Всички'
+}
+
 const buildResultCard = (timeline) => {
   if (!timeline) {
     currentTimeline = null
@@ -226,7 +285,7 @@ const buildResultCard = (timeline) => {
   currentTimeline = timeline
 
   const favoriteLabel = isFavorite(timeline.id)
-    ? 'Премахни'
+    ? 'Премахни от архива'
     : 'Запази в архива'
 
   const techValue = parseLevel(timeline.technologyLevel)
@@ -237,12 +296,14 @@ const buildResultCard = (timeline) => {
   resultCard.innerHTML = `
     <div class="reveal">
       <div class="archive-label">Архивно досие</div>
+         <div class="dossier-stamp">Архивиран</div>
       <h2>${timeline.title}</h2>
       <div class="archive-meta">
         <span>Архивен код: ${archiveId}</span>
         <span>Статус на сигнала: ${signalStatus}</span>
         <span>Класификация: Публична симулация</span>
       </div>
+         <div class="dossier-id">Досие № ${archiveId}</div>
       <div class="timeline-meta">
         <span class="tag">${timeline.city}</span>
         <span class="tag">${timeline.year}</span>
@@ -292,6 +353,7 @@ const buildResultCard = (timeline) => {
   <button class="btn" id="favorite-toggle" type="button">${favoriteLabel}</button>
   <button class="btn secondary" id="copy-description" type="button">Копирай описанието</button>
       </div>
+         <div class="dossier-end">[КРАЙ НА ДОСИЕТО]</div>
     </div>
   `
 
@@ -345,8 +407,12 @@ const renderFavorites = () => {
   )
 
   if (!favoriteTimelines.length) {
-    favoritesList.innerHTML =
-      '<p class="empty-state">Още няма запазени времеви линии. Запази първата, за да изградиш личния си архив.</p>'
+    favoritesList.innerHTML = `
+      <div class="favorites-empty">
+        <p class="empty-title">Още няма запазени времеви линии.</p>
+        <p class="empty-secondary">Запази първата, за да изградиш личния си архив.</p>
+      </div>
+    `
     return
   }
 
@@ -395,6 +461,15 @@ const generateRandomTimeline = () => {
 startButton.addEventListener('click', () => {
   document.querySelector('#controls').scrollIntoView({ behavior: 'smooth' })
 })
+
+citySelect.addEventListener('change', updateCoordinateStatus)
+yearSelect.addEventListener('change', updateCoordinateStatus)
+scenarioSelect.addEventListener('change', updateCoordinateStatus)
+
+updateCoordinateStatus()
+
+updateSystemTime()
+setInterval(updateSystemTime, 60000)
 
 randomHeroButton.addEventListener('click', generateRandomTimeline)
 generateButton.addEventListener('click', generateSelectedTimeline)
