@@ -408,6 +408,22 @@ a {
   display: grid;
   gap: 32px;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  align-items: stretch;
+}
+
+.content-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.middle-column .controls {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.middle-column .coord-status {
+  margin-top: auto;
 }
 
 .card {
@@ -1059,7 +1075,7 @@ footer {
   .content {
     grid-template-columns: minmax(300px, 330px) minmax(320px, 360px) minmax(640px, 1fr);
     gap: 36px;
-    align-items: start;
+    align-items: stretch;
   }
 }
 

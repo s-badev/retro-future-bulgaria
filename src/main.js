@@ -85,108 +85,112 @@ app.innerHTML = `
     </section>
 
     <main class="content">
-      <section class="featured card archive-panel" id="archive-panel">
-        <div class="section-title">
-          <h3>Избрани архиви</h3>
-          <p>Бърз достъп до ключови времеви линии в регистъра.</p>
-        </div>
-        <div class="featured-grid">
-          ${featuredTimelineIds
-            .map((timelineId) => {
-              const timeline = timelines.find((item) => item.id === timelineId)
-              if (!timeline) return ''
-              return `
-                <button class="featured-card" data-feature-id="${timeline.id}" type="button">
-                  <span class="featured-accent" aria-hidden="true"></span>
-                  <span class="featured-title">${timeline.city} · ${timeline.year}</span>
-                  <strong>${timeline.title}</strong>
-                  <span class="featured-scenario">${timeline.scenario}</span>
-                  <span class="featured-action">Отвори досие</span>
-                </button>
-              `
-            })
-            .join('')}
-        </div>
-        <div class="archive-divider" role="presentation"></div>
-        <div class="archive-section" id="favorites">
-          <div class="section-title compact">
-            <h3>Личен архив</h3>
-            <p>Съхранени сигнали от линии, които искаш да разгледаш отново.</p>
+      <div class="content-column left-column">
+        <section class="featured card archive-panel" id="archive-panel">
+          <div class="section-title">
+            <h3>Избрани архиви</h3>
+            <p>Бърз достъп до ключови времеви линии в регистъра.</p>
           </div>
-          <div class="favorites-list" id="favorites-list">
-            <div class="favorites-empty">
-              <p class="empty-title">Още няма запазени времеви линии.</p>
-              <p class="empty-secondary">Запази първата, за да изградиш личния си архив.</p>
+          <div class="featured-grid">
+            ${featuredTimelineIds
+              .map((timelineId) => {
+                const timeline = timelines.find((item) => item.id === timelineId)
+                if (!timeline) return ''
+                return `
+                  <button class="featured-card" data-feature-id="${timeline.id}" type="button">
+                    <span class="featured-accent" aria-hidden="true"></span>
+                    <span class="featured-title">${timeline.city} · ${timeline.year}</span>
+                    <strong>${timeline.title}</strong>
+                    <span class="featured-scenario">${timeline.scenario}</span>
+                    <span class="featured-action">Отвори досие</span>
+                  </button>
+                `
+              })
+              .join('')}
+          </div>
+          <div class="archive-divider" role="presentation"></div>
+          <div class="archive-section" id="favorites">
+            <div class="section-title compact">
+              <h3>Личен архив</h3>
+              <p>Съхранени сигнали от линии, които искаш да разгледаш отново.</p>
+            </div>
+            <div class="favorites-list" id="favorites-list">
+              <div class="favorites-empty">
+                <p class="empty-title">Още няма запазени времеви линии.</p>
+                <p class="empty-secondary">Запази първата, за да изградиш личния си архив.</p>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
-      <section class="controls card" id="controls">
-        <div class="section-title">
-          <h3>Избери координати</h3>
-          <p>Калибрирай града, годината и сценария, за да отвориш паралелен архив.</p>
-        </div>
-        <div>
-          <label for="city-select">Град</label>
-          <select id="city-select">
-            <option value="">Всички</option>
-            ${createTimelineOptions(cities)}
-          </select>
-        </div>
-        <div>
-          <label for="year-select">Година</label>
-          <select id="year-select">
-            <option value="">Всички</option>
-            ${createTimelineOptions(years)}
-          </select>
-        </div>
-        <div>
-          <label for="scenario-select">Сценарий</label>
-          <select id="scenario-select">
-            <option value="">Всички</option>
-            ${createTimelineOptions(scenarios)}
-          </select>
-        </div>
-  <button class="btn" id="generate" type="button">Отвори избраната линия</button>
-  <button class="btn secondary" id="random" type="button">Отвори случайна линия</button>
-        <div class="status-divider" role="presentation"></div>
-        <div class="coord-status" aria-live="polite">
-          <h4>Сигнална диагностика</h4>
-          <div class="coord-row">
-            <span>Градски възел</span>
-            <strong id="coord-city">Всички</strong>
+        </section>
+      </div>
+      <div class="content-column middle-column">
+        <section class="controls card" id="controls">
+          <div class="section-title">
+            <h3>Избери координати</h3>
+            <p>Калибрирай града, годината и сценария, за да отвориш паралелен архив.</p>
           </div>
-          <div class="coord-row">
-            <span>Времева честота</span>
-            <strong id="coord-year">Всички</strong>
+          <div>
+            <label for="city-select">Град</label>
+            <select id="city-select">
+              <option value="">Всички</option>
+              ${createTimelineOptions(cities)}
+            </select>
           </div>
-          <div class="coord-row">
-            <span>Сценарен слой</span>
-            <strong id="coord-scenario">Всички</strong>
+          <div>
+            <label for="year-select">Година</label>
+            <select id="year-select">
+              <option value="">Всички</option>
+              ${createTimelineOptions(years)}
+            </select>
           </div>
-          <div class="coord-row">
-            <span>Достъп</span>
-            <strong id="coord-access">Готов</strong>
+          <div>
+            <label for="scenario-select">Сценарий</label>
+            <select id="scenario-select">
+              <option value="">Всички</option>
+              ${createTimelineOptions(scenarios)}
+            </select>
           </div>
-        </div>
-      </section>
-
-      <section class="result card" id="result-card">
-        <div class="empty-visual">
-          <div class="orb"></div>
-          <div class="scan"></div>
-        </div>
-    <h2>Няма засечен времеви сигнал</h2>
-        <p class="empty-state">
-          Избери град, година и сценарий, за да отвориш паралелна българска времева линия.
-        </p>
-        <div class="empty-details">
-          <span>Статус на сигнала: изчакване</span>
-          <span>Архивен поток: офлайн</span>
-          <span>Необходими координати</span>
-        </div>
-      </section>
-
+          <button class="btn" id="generate" type="button">Отвори избраната линия</button>
+          <button class="btn secondary" id="random" type="button">Отвори случайна линия</button>
+          <div class="status-divider" role="presentation"></div>
+          <div class="coord-status" aria-live="polite">
+            <h4>Сигнална диагностика</h4>
+            <div class="coord-row">
+              <span>Градски възел</span>
+              <strong id="coord-city">Всички</strong>
+            </div>
+            <div class="coord-row">
+              <span>Времева честота</span>
+              <strong id="coord-year">Всички</strong>
+            </div>
+            <div class="coord-row">
+              <span>Сценарен слой</span>
+              <strong id="coord-scenario">Всички</strong>
+            </div>
+            <div class="coord-row">
+              <span>Достъп</span>
+              <strong id="coord-access">Готов</strong>
+            </div>
+          </div>
+        </section>
+      </div>
+      <div class="content-column right-column">
+        <section class="result card" id="result-card">
+          <div class="empty-visual">
+            <div class="orb"></div>
+            <div class="scan"></div>
+          </div>
+          <h2>Няма засечен времеви сигнал</h2>
+          <p class="empty-state">
+            Избери град, година и сценарий, за да отвориш паралелна българска времева линия.
+          </p>
+          <div class="empty-details">
+            <span>Статус на сигнала: изчакване</span>
+            <span>Архивен поток: офлайн</span>
+            <span>Необходими координати</span>
+          </div>
+        </section>
+      </div>
     </main>
 
     <footer>
