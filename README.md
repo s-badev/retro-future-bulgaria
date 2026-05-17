@@ -85,28 +85,6 @@ The experience is designed to feel like accessing a **classified archive system 
 
 ---
 
-## 🖼️ Screenshots
-
-> Screenshots will be added after the final visual pass and Netlify deployment.
-
-### Home / Hero
-
-![Home screen](assets/screenshots/home.png)
-
-### Archive Dashboard
-
-![Archive dashboard](assets/screenshots/dashboard.png)
-
-### Timeline Dossier
-
-![Timeline dossier](assets/screenshots/timeline-dossier.png)
-
-### Personal Archive
-
-![Personal archive](assets/screenshots/personal-archive.png)
-
----
-
 ## 🧱 Tech Stack
 
 ![Vite](https://img.shields.io/badge/Vite-646cff?style=flat-square&logo=vite&logoColor=white)
