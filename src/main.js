@@ -24,6 +24,12 @@ const scenarios = [
   'Дунавска технологична република',
 ]
 
+const featuredTimelineIds = [
+  'sofia-2084-balkan-space-program',
+  'varna-2026-black-sea-tech',
+  'ruse-2026-black-sea-tech',
+]
+
 const app = document.querySelector('#app')
 
 app.innerHTML = `
@@ -42,16 +48,57 @@ app.innerHTML = `
           <span class="chip">Локални данни</span>
           <span class="chip">Без AI API</span>
           <span class="chip">Готов за Netlify</span>
-          <span class="chip">Supabase v2 планиран</span>
+          <span class="chip">Локален архив</span>
         </div>
         <div class="hero-actions">
-          <button class="btn" id="start-exploring">Започни</button>
-          <button class="btn secondary" id="random-hero">Случайна линия</button>
+          <button class="btn" id="start-exploring" type="button">Започни</button>
+          <button class="btn secondary" id="random-hero" type="button">Случайна линия</button>
         </div>
       </div>
     </header>
 
+    <section class="status-strip">
+      <div class="status-card">
+        <span>Активни сигнали</span>
+        <strong>20+</strong>
+      </div>
+      <div class="status-card">
+        <span>Режим</span>
+        <strong>Локален архив</strong>
+      </div>
+      <div class="status-card">
+        <span>Архив</span>
+        <strong>Browser Storage</strong>
+      </div>
+      <div class="status-card">
+        <span>Външни заявки</span>
+        <strong>Няма</strong>
+      </div>
+    </section>
+
     <main class="content">
+      <section class="featured card">
+        <div class="section-title">
+          <h3>Избрани архиви</h3>
+          <p>Бърз достъп до ключови времеви линии в регистъра.</p>
+        </div>
+        <div class="featured-grid">
+          ${featuredTimelineIds
+            .map((timelineId) => {
+              const timeline = timelines.find((item) => item.id === timelineId)
+              if (!timeline) return ''
+              return `
+                <button class="featured-card" data-feature-id="${timeline.id}" type="button">
+                  <span class="featured-title">${timeline.city} · ${timeline.year}</span>
+                  <strong>${timeline.title}</strong>
+                  <span class="featured-scenario">${timeline.scenario}</span>
+                  <span class="featured-action">Отвори досие</span>
+                </button>
+              `
+            })
+            .join('')}
+        </div>
+      </section>
       <section class="controls card" id="controls">
         <div class="section-title">
           <h3>Избери координати</h3>
@@ -78,8 +125,8 @@ app.innerHTML = `
             ${createTimelineOptions(scenarios)}
           </select>
         </div>
-  <button class="btn" id="generate">Отвори избраната линия</button>
-  <button class="btn secondary" id="random">Отвори случайна линия</button>
+  <button class="btn" id="generate" type="button">Отвори избраната линия</button>
+  <button class="btn secondary" id="random" type="button">Отвори случайна линия</button>
       </section>
 
       <section class="result card" id="result-card">
@@ -87,7 +134,7 @@ app.innerHTML = `
           <div class="orb"></div>
           <div class="scan"></div>
         </div>
-  <h2>Няма засечен времеви сигнал</h2>
+    <h2>Няма засечен времеви сигнал</h2>
         <p class="empty-state">
           Избери град, година и сценарий, за да отвориш паралелна българска времева линия.
         </p>
@@ -165,8 +212,8 @@ const buildResultCard = (timeline) => {
         <div class="orb"></div>
         <div class="scan"></div>
       </div>
-  <h2>Няма съвпадаща времева линия</h2>
-  <p class="empty-state">Промени филтрите или отвори случайна линия.</p>
+      <h2>Няма съвпадаща времева линия</h2>
+      <p class="empty-state">Промени филтрите или отвори случайна линия.</p>
       <div class="empty-details">
         <span>Статус на сигнала: търсене</span>
         <span>Архивен поток: офлайн</span>
@@ -189,11 +236,11 @@ const buildResultCard = (timeline) => {
 
   resultCard.innerHTML = `
     <div class="reveal">
-  <div class="archive-label">Архивно досие</div>
+      <div class="archive-label">Архивно досие</div>
       <h2>${timeline.title}</h2>
       <div class="archive-meta">
         <span>Архивен код: ${archiveId}</span>
-  <span>Статус на сигнала: ${signalStatus}</span>
+        <span>Статус на сигнала: ${signalStatus}</span>
         <span>Класификация: Публична симулация</span>
       </div>
       <div class="timeline-meta">
@@ -242,8 +289,8 @@ const buildResultCard = (timeline) => {
         <p>${timeline.diaryEntry}</p>
       </div>
       <div class="actions">
-        <button class="btn" id="favorite-toggle">${favoriteLabel}</button>
-        <button class="btn secondary" id="copy-description">Копирай описанието</button>
+  <button class="btn" id="favorite-toggle" type="button">${favoriteLabel}</button>
+  <button class="btn secondary" id="copy-description" type="button">Копирай описанието</button>
       </div>
     </div>
   `
@@ -257,12 +304,38 @@ const buildResultCard = (timeline) => {
   document.querySelector('#copy-description').addEventListener('click', async () => {
     const success = await copyToClipboard(timeline.description)
     if (success) {
-      document.querySelector('#copy-description').textContent = 'Copied!'
+      document.querySelector('#copy-description').textContent = 'Копирано!'
       setTimeout(() => {
-        document.querySelector('#copy-description').textContent = 'Copy Description'
+        document.querySelector('#copy-description').textContent = 'Копирай описанието'
       }, 1500)
     }
   })
+}
+
+const loadingMessages = [
+  'Сканиране на времеви сигнал...',
+  'Синхронизиране на архивен код...',
+  'Отваряне на паралелен запис...',
+]
+
+const showLoadingState = () => {
+  const message = loadingMessages[Math.floor(Math.random() * loadingMessages.length)]
+  resultCard.innerHTML = `
+    <div class="loading-state">
+      <div class="loading-orb"></div>
+      <p>${message}</p>
+    </div>
+  `
+}
+
+const openTimelineWithDelay = (timeline) => {
+  if (!timeline) {
+    buildResultCard(null)
+    return
+  }
+
+  showLoadingState()
+  setTimeout(() => buildResultCard(timeline), 650)
 }
 
 const renderFavorites = () => {
@@ -287,7 +360,7 @@ const renderFavorites = () => {
             <span>${timeline.year}</span>
             <span>${timeline.scenario}</span>
           </div>
-          <button class="btn secondary" data-remove="${timeline.id}">Премахни</button>
+          <button class="btn secondary" data-remove="${timeline.id}" type="button">Премахни</button>
         </div>
       `
     )
@@ -308,7 +381,7 @@ const renderFavorites = () => {
 const generateSelectedTimeline = () => {
   const filtered = filterTimelines(timelines, getFilters())
   const timeline = getRandomTimeline(filtered)
-  buildResultCard(timeline)
+  openTimelineWithDelay(timeline)
 }
 
 const generateRandomTimeline = () => {
@@ -316,7 +389,7 @@ const generateRandomTimeline = () => {
   const filtered = filterTimelines(timelines, filters)
   const source = filtered.length ? filtered : timelines
   const timeline = getRandomTimeline(source)
-  buildResultCard(timeline)
+  openTimelineWithDelay(timeline)
 }
 
 startButton.addEventListener('click', () => {
@@ -326,5 +399,17 @@ startButton.addEventListener('click', () => {
 randomHeroButton.addEventListener('click', generateRandomTimeline)
 generateButton.addEventListener('click', generateSelectedTimeline)
 randomButton.addEventListener('click', generateRandomTimeline)
+
+document.querySelectorAll('[data-feature-id]').forEach((button) => {
+  button.addEventListener('click', () => {
+    document.querySelectorAll('.featured-card').forEach((card) => {
+      card.classList.remove('is-active')
+    })
+    button.classList.add('is-active')
+    const timeline = timelines.find((item) => item.id === button.dataset.featureId)
+    openTimelineWithDelay(timeline)
+    resultCard.scrollIntoView({ behavior: 'smooth' })
+  })
+})
 
 renderFavorites()
