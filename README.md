@@ -339,14 +339,32 @@ This approach is intentionally simple for the MVP and avoids backend complexity.
 
 Current build check:
 
+## 🧪 Quality Checks
+
+Current build check:
+
 ```bash
 npm run build
+```
+
+The project is designed as a static frontend app, so the most important MVP checks are:
+
+- successful production build
+- no console errors
+- timeline generation works
+- selected filters work
+- random timeline works
+- featured archive cards work
+- LocalStorage favorites work
+- remove favorite works
+- copy description works
+- responsive layout remains usable
 
 ---
 
-##  Deployment + MVP Scope
+## 📦 Deployment + MVP Scope
 
-## 📦 Deployment
+### 📦 Deployment
 
 The project is prepared for static deployment.
 
@@ -359,12 +377,45 @@ Expected settings:
 ```text
 Build command: npm run build
 Publish directory: dist
+```
+
+Live demo will be added after deployment.
 
 ---
 
-## Planned Supabase v2 + Roadmap
+### 🧱 Current MVP Scope
 
-## 🗄️ Planned Supabase v2
+The current version includes:
+
+- local predefined timeline data
+- dynamic city/year/scenario filtering
+- random timeline generation
+- featured archive shortcuts
+- archive dossier rendering
+- archive visualization panel
+- LocalStorage favorites
+- personal archive management
+- clipboard copy action
+- responsive frontend layout
+- production build support
+
+The current version does **not** include:
+
+- backend database
+- user authentication
+- cloud sync
+- AI-generated timeline content
+- AI-generated images
+- admin panel
+- public user submissions
+
+This keeps the MVP focused, lightweight, and stable.
+
+---
+
+## 🗄️ Planned Supabase v2 + Roadmap
+
+### 🗄️ Planned Supabase v2
 
 A future Supabase-based version may include:
 
@@ -382,7 +433,7 @@ Supabase is intentionally planned for a later version so the core frontend exper
 
 ---
 
-## 🛣️ Planned Improvements
+### 🛣️ Planned Improvements
 
 Possible next improvements:
 
@@ -451,6 +502,13 @@ Created by **Stefan Badev**
 
 GitHub: [@s-badev](https://github.com/s-badev)
 
+---
+
+## 📄 License
+
+This project is currently intended as a personal portfolio project.
+
+A license may be added later.
 ---
 
 ## 📄 License
