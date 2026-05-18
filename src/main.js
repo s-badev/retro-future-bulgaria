@@ -85,7 +85,7 @@ app.innerHTML = `
     </section>
 
     <main class="content">
-      <div class="content-column left-column">
+      <div class="workspace-row">
         <section class="featured card archive-panel" id="archive-panel">
           <div class="section-title">
             <h3>Избрани архиви</h3>
@@ -122,8 +122,6 @@ app.innerHTML = `
             </div>
           </div>
         </section>
-      </div>
-      <div class="content-column middle-column">
         <section class="controls card" id="controls">
           <div class="section-title">
             <h3>Избери координати</h3>
@@ -174,7 +172,7 @@ app.innerHTML = `
           </div>
         </section>
       </div>
-      <div class="content-column right-column">
+      <div class="dossier-row">
         <section class="result card" id="result-card">
           <div class="empty-visual">
             <div class="orb"></div>
@@ -188,6 +186,87 @@ app.innerHTML = `
             <span>Статус на сигнала: изчакване</span>
             <span>Архивен поток: офлайн</span>
             <span>Необходими координати</span>
+          </div>
+        </section>
+        <section class="card signal-preview" id="signal-preview">
+          <div class="section-title">
+            <h3>Архивна визуализация</h3>
+            <p>Избери или отвори времева линия, за да се зареди сигнална карта.</p>
+          </div>
+          <div class="signal-visual">
+            <div class="signal-grid"></div>
+            <div class="signal-ring"></div>
+            <div class="signal-bars" id="signal-bars"></div>
+            <div class="signal-node"></div>
+            <span class="signal-ghost" id="signal-ghost">--</span>
+          </div>
+          <div class="signal-meta">
+            <div class="signal-row">
+              <span>Градски възел</span>
+              <strong id="signal-city">—</strong>
+            </div>
+            <div class="signal-row">
+              <span>Година</span>
+              <strong id="signal-year">—</strong>
+            </div>
+            <div class="signal-row">
+              <span>Сценарий</span>
+              <strong id="signal-scenario">—</strong>
+            </div>
+            <div class="signal-row">
+              <span>Сигнал</span>
+              <strong id="signal-status">СИГНАЛ: ИЗЧАКВАНЕ</strong>
+            </div>
+            <div class="signal-row">
+              <span>Риск</span>
+              <strong id="signal-risk">—</strong>
+            </div>
+            <div class="signal-row">
+              <span>Технологичен слой</span>
+              <strong id="signal-tech">—</strong>
+            </div>
+            <div class="signal-row">
+              <span>Архивен код</span>
+              <strong id="signal-archive">—</strong>
+            </div>
+          </div>
+          <div class="signal-section">
+            <h4>Сигнална линия</h4>
+            <div class="signal-timeline">
+              <div class="timeline-step">
+                <span>Възел</span>
+                <strong id="timeline-node">—</strong>
+              </div>
+              <div class="timeline-step">
+                <span>Сценарий</span>
+                <strong id="timeline-scenario">—</strong>
+              </div>
+              <div class="timeline-step">
+                <span>Досие</span>
+                <strong id="timeline-dossier">—</strong>
+              </div>
+            </div>
+          </div>
+          <div class="signal-section">
+            <h4>Архивни показатели</h4>
+            <div class="signal-metrics">
+              <div class="metric-chip">
+                <span>Стабилност</span>
+                <strong id="metric-stability">—</strong>
+              </div>
+              <div class="metric-chip">
+                <span>Риск</span>
+                <strong id="metric-risk">—</strong>
+              </div>
+              <div class="metric-chip">
+                <span>Технологии</span>
+                <strong id="metric-tech">—</strong>
+              </div>
+            </div>
+          </div>
+          <div class="signal-section">
+            <h4>Бележка от архива</h4>
+            <p class="signal-note" id="signal-note">Избери времева линия, за да се зареди архивен анализ.</p>
           </div>
         </section>
       </div>
@@ -210,6 +289,23 @@ const coordYear = document.querySelector('#coord-year')
 const coordScenario = document.querySelector('#coord-scenario')
 const systemTime = document.querySelector('#system-time')
 const lastAccess = document.querySelector('#last-access')
+const signalPreview = document.querySelector('#signal-preview')
+const signalBars = document.querySelector('#signal-bars')
+const signalGhost = document.querySelector('#signal-ghost')
+const signalCity = document.querySelector('#signal-city')
+const signalYear = document.querySelector('#signal-year')
+const signalScenario = document.querySelector('#signal-scenario')
+const signalStatus = document.querySelector('#signal-status')
+const signalRisk = document.querySelector('#signal-risk')
+const signalTech = document.querySelector('#signal-tech')
+const signalArchive = document.querySelector('#signal-archive')
+const timelineNode = document.querySelector('#timeline-node')
+const timelineScenario = document.querySelector('#timeline-scenario')
+const timelineDossier = document.querySelector('#timeline-dossier')
+const metricStability = document.querySelector('#metric-stability')
+const metricRisk = document.querySelector('#metric-risk')
+const metricTech = document.querySelector('#metric-tech')
+const signalNote = document.querySelector('#signal-note')
 
 const citySelect = document.querySelector('#city-select')
 const yearSelect = document.querySelector('#year-select')
@@ -267,6 +363,77 @@ const updateCoordinateStatus = () => {
   coordScenario.textContent = scenarioSelect.value || 'Всички'
 }
 
+const getScenarioAccent = (scenario) => {
+  const value = scenario.toLowerCase()
+  if (value.includes('космическа')) return 'accent-cyan'
+  if (value.includes('технологична')) return 'accent-blue'
+  if (value.includes('царска') || value.includes('османска')) return 'accent-amber'
+  if (value.includes('постапокалип')) return 'accent-rose'
+  return 'accent-violet'
+}
+
+const renderSignalBars = (count) => {
+  signalBars.innerHTML = Array.from({ length: count }, (_, index) => {
+    const height = 30 + ((index * 17) % 55)
+    return `<span style="height: ${height}%"></span>`
+  }).join('')
+}
+
+const getArchiveNote = (signalState) => {
+  if (signalState === 'Фрагментиран') {
+    return 'Линията показва силно отклонение от познатата историческа траектория.'
+  }
+  if (signalState === 'Нестабилен') {
+    return 'Сигналът съдържа достатъчно данни за възстановяване на градската линия.'
+  }
+  return 'Архивният слой е активен и готов за повторно отваряне.'
+}
+
+const renderArchiveVisualization = (timeline) => {
+  if (!timeline) {
+    signalPreview.className = 'card signal-preview is-idle'
+    signalGhost.textContent = '--'
+    signalCity.textContent = '—'
+    signalYear.textContent = '—'
+    signalScenario.textContent = '—'
+    signalStatus.textContent = 'СИГНАЛ: ИЗЧАКВАНЕ'
+    signalRisk.textContent = '—'
+    signalTech.textContent = '—'
+    signalArchive.textContent = '—'
+    timelineNode.textContent = '—'
+    timelineScenario.textContent = '—'
+    timelineDossier.textContent = '—'
+    metricStability.textContent = '—'
+    metricRisk.textContent = '—'
+    metricTech.textContent = '—'
+    signalNote.textContent = 'Избери времева линия, за да се зареди архивен анализ.'
+    renderSignalBars(6)
+    return
+  }
+
+  const signalState = getSignalStatus(timeline.riskLevel)
+  const accent = getScenarioAccent(timeline.scenario)
+  const archiveId = getArchiveId(timeline)
+
+  signalPreview.className = `card signal-preview ${accent} is-active`
+  signalGhost.textContent = timeline.year
+  signalCity.textContent = timeline.city
+  signalYear.textContent = timeline.year
+  signalScenario.textContent = timeline.scenario
+  signalStatus.textContent = `СИГНАЛ: ${signalState.toUpperCase()}`
+  signalRisk.textContent = timeline.riskLevel
+  signalTech.textContent = timeline.technologyLevel
+  signalArchive.textContent = archiveId
+  timelineNode.textContent = timeline.city
+  timelineScenario.textContent = timeline.scenario
+  timelineDossier.textContent = archiveId
+  metricStability.textContent = signalState.toLowerCase()
+  metricRisk.textContent = timeline.riskLevel
+  metricTech.textContent = timeline.technologyLevel
+  signalNote.textContent = getArchiveNote(signalState)
+  renderSignalBars(Math.max(4, Math.round(parseLevel(timeline.technologyLevel) / 10)))
+}
+
 const buildResultCard = (timeline) => {
   if (!timeline) {
     currentTimeline = null
@@ -283,6 +450,7 @@ const buildResultCard = (timeline) => {
         <span>Необходими координати</span>
       </div>
     `
+    renderArchiveVisualization(null)
     return
   }
 
@@ -360,6 +528,8 @@ const buildResultCard = (timeline) => {
          <div class="dossier-end">[КРАЙ НА ДОСИЕТО]</div>
     </div>
   `
+
+    renderArchiveVisualization(timeline)
 
   document.querySelector('#favorite-toggle').addEventListener('click', () => {
     toggleFavorite(timeline.id)
@@ -474,6 +644,8 @@ updateCoordinateStatus()
 
 updateSystemTime()
 setInterval(updateSystemTime, 60000)
+
+renderArchiveVisualization(null)
 
 randomHeroButton.addEventListener('click', generateRandomTimeline)
 generateButton.addEventListener('click', generateSelectedTimeline)
