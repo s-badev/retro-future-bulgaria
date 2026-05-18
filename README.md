@@ -132,7 +132,6 @@ The README is written in English so the project can still be reviewed by interna
 
 ## Project Structure + Local Setup
 
-````markdown
 ## 🗂️ Project Structure
 
 ```text
@@ -156,7 +155,6 @@ retro-future-bulgaria/
 
 ## How It Works + Data Model
 
-````markdown
 ## 🕹️ How the App Works
 
 The app uses a local collection of handcrafted fictional timeline records.
@@ -347,7 +345,6 @@ npm run build
 
 ##  Deployment + MVP Scope
 
-```markdown
 ## 📦 Deployment
 
 The project is prepared for static deployment.
@@ -366,7 +363,6 @@ Publish directory: dist
 
 ## Planned Supabase v2 + Roadmap
 
-```markdown
 ## 🗄️ Planned Supabase v2
 
 A future Supabase-based version may include:
