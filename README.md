@@ -150,12 +150,13 @@ retro-future-bulgaria/
 ├── package-lock.json
 ├── README.md
 └── .gitignore
+```
 
 ---
 
-## How It Works + Data Model
+## 🕹️ How It Works + Data Model
 
-## 🕹️ How the App Works
+### 🕹️ How the App Works
 
 The app uses a local collection of handcrafted fictional timeline records.
 
@@ -176,7 +177,7 @@ Favorites are stored locally in the browser using **LocalStorage**.
 
 ---
 
-## 🧬 Timeline Data Model
+### 🧬 Timeline Data Model
 
 A timeline record can include fields such as:
 
