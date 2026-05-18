@@ -339,10 +339,6 @@ This approach is intentionally simple for the MVP and avoids backend complexity.
 
 Current build check:
 
-## 🧪 Quality Checks
-
-Current build check:
-
 ```bash
 npm run build
 ```
@@ -508,9 +504,3 @@ GitHub: [@s-badev](https://github.com/s-badev)
 
 This project is currently intended as a personal portfolio project.
 
-A license may be added later.
----
-
-## 📄 License
-
-This project is currently intended as a personal portfolio project.
