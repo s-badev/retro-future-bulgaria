@@ -10,19 +10,14 @@ import {
   toggleFavorite,
 } from './utils/generator.js'
 
-const cities = ['София', 'Пловдив', 'Варна', 'Бургас', 'Велико Търново', 'Русе']
-const years = [1920, 1944, 1989, 2026, 2084]
-const scenarios = [
-  'Киберпънк България',
-  'Социалистически мегаград',
-  'Царска столица',
-  'Постапокалиптични Балкани',
-  'Балканска космическа програма',
-  'Османска сенчеста времева линия',
-  'Бъдеще от Възраждането',
-  'Черноморска технологична република',
-  'Дунавска технологична република',
-]
+const uniqueValues = (list) => Array.from(new Set(list))
+const cities = uniqueValues(timelines.map((item) => item.city)).sort((a, b) =>
+  a.localeCompare(b, 'bg')
+)
+const years = uniqueValues(timelines.map((item) => item.year)).sort((a, b) => a - b)
+const scenarios = uniqueValues(timelines.map((item) => item.scenario)).sort((a, b) =>
+  a.localeCompare(b, 'bg')
+)
 
 const featuredTimelineIds = [
   'sofia-2084-balkan-space-program',
@@ -96,13 +91,38 @@ app.innerHTML = `
               .map((timelineId) => {
                 const timeline = timelines.find((item) => item.id === timelineId)
                 if (!timeline) return ''
+                const archiveId = `${timeline.city.slice(0, 3).toUpperCase()}-${timeline.year}-${timeline.id
+                  .split('-')
+                  .slice(-1)[0]
+                  .toUpperCase()}`
+                const riskText = timeline.riskLevel.toLowerCase()
+                const signalLabel = riskText.includes('висок')
+                  ? 'Фрагментиран'
+                  : riskText.includes('среден')
+                    ? 'Нестабилен'
+                    : 'Стабилен'
+                const imageMarkup = timeline.image
+                  ? `<img class="archive-card__image" src="${timeline.image}" alt="${timeline.title}" loading="lazy" />`
+                  : ''
                 return `
-                  <button class="featured-card" data-feature-id="${timeline.id}" type="button">
-                    <span class="featured-accent" aria-hidden="true"></span>
-                    <span class="featured-title">${timeline.city} · ${timeline.year}</span>
-                    <strong>${timeline.title}</strong>
-                    <span class="featured-scenario">${timeline.scenario}</span>
-                    <span class="featured-action">Отвори досие</span>
+                  <button class="featured-card archive-card" data-feature-id="${timeline.id}" type="button">
+                    <div class="archive-card__media" data-scenario="${timeline.scenario}">
+                      ${imageMarkup}
+                      <span class="archive-card__code">${archiveId}</span>
+                      <span class="archive-card__status">${signalLabel}</span>
+                    </div>
+                    <div class="archive-card__body">
+                      <div class="archive-card__meta">
+                        <span>${timeline.city} · ${timeline.year}</span>
+                        <span>${timeline.scenario}</span>
+                      </div>
+                      <strong>${timeline.title}</strong>
+                      <div class="archive-card__stats">
+                        <span>ТЕХ: ${timeline.technologyLevel}</span>
+                        <span>РИСК: ${timeline.riskLevel}</span>
+                      </div>
+                      <span class="featured-action">Отвори досие</span>
+                    </div>
                   </button>
                 `
               })
@@ -249,18 +269,28 @@ app.innerHTML = `
           </div>
           <div class="signal-section">
             <h4>Архивни показатели</h4>
-            <div class="signal-metrics">
-              <div class="metric-chip">
+            <div class="visual-metrics">
+              <div class="visual-metric-card">
                 <span>Стабилност</span>
-                <strong id="metric-stability">—</strong>
+                <strong id="metric-stability" class="visual-metric-value">—</strong>
               </div>
-              <div class="metric-chip">
+              <div class="visual-metric-card">
                 <span>Риск</span>
-                <strong id="metric-risk">—</strong>
+                <strong id="metric-risk" class="visual-metric-value">—</strong>
               </div>
-              <div class="metric-chip">
+              <div class="visual-metric-card">
                 <span>Технологии</span>
-                <strong id="metric-tech">—</strong>
+                <strong id="metric-tech" class="visual-metric-value">—</strong>
+              </div>
+            </div>
+            <div class="visual-details">
+              <div class="visual-detail-row">
+                <span>Рисков профил</span>
+                <strong id="detail-risk">—</strong>
+              </div>
+              <div class="visual-detail-row">
+                <span>Технологичен слой</span>
+                <strong id="detail-tech">—</strong>
               </div>
             </div>
           </div>
@@ -287,6 +317,7 @@ const favoritesList = document.querySelector('#favorites-list')
 const coordCity = document.querySelector('#coord-city')
 const coordYear = document.querySelector('#coord-year')
 const coordScenario = document.querySelector('#coord-scenario')
+const coordAccess = document.querySelector('#coord-access')
 const systemTime = document.querySelector('#system-time')
 const lastAccess = document.querySelector('#last-access')
 const signalPreview = document.querySelector('#signal-preview')
@@ -306,6 +337,8 @@ const metricStability = document.querySelector('#metric-stability')
 const metricRisk = document.querySelector('#metric-risk')
 const metricTech = document.querySelector('#metric-tech')
 const signalNote = document.querySelector('#signal-note')
+const detailRisk = document.querySelector('#detail-risk')
+const detailTech = document.querySelector('#detail-tech')
 
 const citySelect = document.querySelector('#city-select')
 const yearSelect = document.querySelector('#year-select')
@@ -342,6 +375,17 @@ const getFilters = () => ({
   scenario: scenarioSelect.value,
 })
 
+const getMatchStatus = (filters) => {
+  if (!timelines.length) {
+    return { status: 'Няма данни', exact: false }
+  }
+  const matches = filterTimelines(timelines, filters)
+  if (matches.length) {
+    return { status: 'Готов', exact: true }
+  }
+  return { status: 'Частичен сигнал', exact: false }
+}
+
 const formatDateTime = (date) => {
   const day = String(date.getDate()).padStart(2, '0')
   const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -361,6 +405,28 @@ const updateCoordinateStatus = () => {
   coordCity.textContent = citySelect.value || 'Всички'
   coordYear.textContent = yearSelect.value || 'Всички'
   coordScenario.textContent = scenarioSelect.value || 'Всички'
+  const { status } = getMatchStatus(getFilters())
+  coordAccess.textContent = status
+}
+
+const updateYearOptions = () => {
+  const selected = yearSelect.value
+  const city = citySelect.value
+  const availableYears = city
+    ? uniqueValues(
+        timelines
+          .filter((item) => item.city === city)
+          .map((item) => item.year)
+      ).sort((a, b) => a - b)
+    : years
+  yearSelect.innerHTML = `<option value="">Всички</option>${createTimelineOptions(
+    availableYears
+  )}`
+  if (selected && !availableYears.map(String).includes(selected)) {
+    yearSelect.value = ''
+  } else {
+    yearSelect.value = selected
+  }
 }
 
 const getScenarioAccent = (scenario) => {
@@ -389,7 +455,22 @@ const getArchiveNote = (signalState) => {
   return 'Архивният слой е активен и готов за повторно отваряне.'
 }
 
-const renderArchiveVisualization = (timeline) => {
+const getShortRisk = (riskText) => {
+  const value = riskText.toLowerCase()
+  if (value.includes('висок')) return 'Висок'
+  if (value.includes('среден')) return 'Среден'
+  if (value.includes('нисък')) return 'Нисък'
+  return 'Среден'
+}
+
+const getShortTech = (techText) => {
+  const level = parseLevel(techText)
+  if (level >= 75) return 'Висок слой'
+  if (level >= 55) return 'Среден слой'
+  return 'Нисък слой'
+}
+
+const renderArchiveVisualization = (timeline, { isFallback = false } = {}) => {
   if (!timeline) {
     signalPreview.className = 'card signal-preview is-idle'
     signalGhost.textContent = '--'
@@ -406,6 +487,8 @@ const renderArchiveVisualization = (timeline) => {
     metricStability.textContent = '—'
     metricRisk.textContent = '—'
     metricTech.textContent = '—'
+    detailRisk.textContent = '—'
+    detailTech.textContent = '—'
     signalNote.textContent = 'Избери времева линия, за да се зареди архивен анализ.'
     renderSignalBars(6)
     return
@@ -428,13 +511,18 @@ const renderArchiveVisualization = (timeline) => {
   timelineScenario.textContent = timeline.scenario
   timelineDossier.textContent = archiveId
   metricStability.textContent = signalState.toLowerCase()
-  metricRisk.textContent = timeline.riskLevel
-  metricTech.textContent = timeline.technologyLevel
-  signalNote.textContent = getArchiveNote(signalState)
+  metricRisk.textContent = getShortRisk(timeline.riskLevel)
+  metricTech.textContent = getShortTech(timeline.technologyLevel)
+  detailRisk.textContent = timeline.riskLevel
+  detailTech.textContent = timeline.technologyLevel
+  const baseNote = getArchiveNote(signalState)
+  signalNote.textContent = isFallback
+    ? `${baseNote} Показана е най-близката налична линия.`
+    : baseNote
   renderSignalBars(Math.max(4, Math.round(parseLevel(timeline.technologyLevel) / 10)))
 }
 
-const buildResultCard = (timeline) => {
+const buildResultCard = (timeline, { notice, emptyTitle, emptyText } = {}) => {
   if (!timeline) {
     currentTimeline = null
     resultCard.innerHTML = `
@@ -442,8 +530,13 @@ const buildResultCard = (timeline) => {
         <div class="orb"></div>
         <div class="scan"></div>
       </div>
-      <h2>Няма съвпадаща времева линия</h2>
-      <p class="empty-state">Промени филтрите или отвори случайна линия.</p>
+      <h2>${emptyTitle || 'Няма точен архивен сигнал'}</h2>
+      <p class="empty-state">
+        ${
+          emptyText ||
+          'Избраната комбинация не е налична в локалния архив. Можеш да отвориш най-близката линия или случайна линия.'
+        }
+      </p>
       <div class="empty-details">
         <span>Статус на сигнала: търсене</span>
         <span>Архивен поток: офлайн</span>
@@ -469,6 +562,7 @@ const buildResultCard = (timeline) => {
     <div class="reveal">
       <div class="archive-label">Архивно досие</div>
          <div class="dossier-stamp">Архивиран</div>
+      ${notice ? `<div class="result-notice">${notice}</div>` : ''}
       <h2>${timeline.title}</h2>
       <div class="archive-meta">
         <span>Архивен код: ${archiveId}</span>
@@ -529,7 +623,7 @@ const buildResultCard = (timeline) => {
     </div>
   `
 
-    renderArchiveVisualization(timeline)
+  renderArchiveVisualization(timeline, { isFallback: Boolean(notice) })
 
   document.querySelector('#favorite-toggle').addEventListener('click', () => {
     toggleFavorite(timeline.id)
@@ -564,14 +658,14 @@ const showLoadingState = () => {
   `
 }
 
-const openTimelineWithDelay = (timeline) => {
+const openTimelineWithDelay = (timeline, options = {}) => {
   if (!timeline) {
     buildResultCard(null)
     return
   }
 
   showLoadingState()
-  setTimeout(() => buildResultCard(timeline), 650)
+  setTimeout(() => buildResultCard(timeline, options), 650)
 }
 
 const renderFavorites = () => {
@@ -618,10 +712,59 @@ const renderFavorites = () => {
   })
 }
 
+const findClosestTimeline = (filters) => {
+  if (!timelines.length) return { timeline: null, exact: false }
+  const exactMatches = filterTimelines(timelines, filters)
+  if (exactMatches.length) {
+    return { timeline: getRandomTimeline(exactMatches), exact: true }
+  }
+
+  const city = filters.city
+  const year = filters.year
+  const scenario = filters.scenario
+
+  const candidates = [
+    city && scenario
+      ? timelines.filter((item) => item.city === city && item.scenario === scenario)
+      : [],
+    city && year
+      ? timelines.filter((item) => item.city === city && String(item.year) === year)
+      : [],
+    city ? timelines.filter((item) => item.city === city) : [],
+    scenario ? timelines.filter((item) => item.scenario === scenario) : [],
+    year ? timelines.filter((item) => String(item.year) === year) : [],
+    timelines,
+  ]
+
+  const match = candidates.find((set) => set.length)
+  return { timeline: getRandomTimeline(match || []), exact: false }
+}
+
 const generateSelectedTimeline = () => {
-  const filtered = filterTimelines(timelines, getFilters())
-  const timeline = getRandomTimeline(filtered)
-  openTimelineWithDelay(timeline)
+  const filters = getFilters()
+  if (!timelines.length) {
+    buildResultCard(null, {
+      emptyTitle: 'Няма налични архивни линии.',
+      emptyText: 'Локалният архив не съдържа достъпни записи.',
+    })
+    coordAccess.textContent = 'Няма данни'
+    renderArchiveVisualization(null)
+    return
+  }
+
+  const { timeline, exact } = findClosestTimeline(filters)
+  if (!timeline) {
+    buildResultCard(null)
+    coordAccess.textContent = 'Няма данни'
+    renderArchiveVisualization(null)
+    return
+  }
+
+  const notice = exact
+    ? ''
+    : 'Няма точен архивен сигнал. Отворена е най-близката налична линия.'
+  coordAccess.textContent = exact ? 'Готов' : 'Частичен сигнал'
+  openTimelineWithDelay(timeline, { notice })
 }
 
 const generateRandomTimeline = () => {
@@ -636,10 +779,14 @@ startButton.addEventListener('click', () => {
   document.querySelector('#controls').scrollIntoView({ behavior: 'smooth' })
 })
 
-citySelect.addEventListener('change', updateCoordinateStatus)
+citySelect.addEventListener('change', () => {
+  updateYearOptions()
+  updateCoordinateStatus()
+})
 yearSelect.addEventListener('change', updateCoordinateStatus)
 scenarioSelect.addEventListener('change', updateCoordinateStatus)
 
+updateYearOptions()
 updateCoordinateStatus()
 
 updateSystemTime()
